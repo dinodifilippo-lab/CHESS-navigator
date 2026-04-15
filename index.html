@@ -5,349 +5,431 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="color-scheme" content="dark">
-<title>CHESS Navigator</title>
+<title>CHESS Navigator v1.1.0</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:#020509 !important;color-scheme:dark}
+body{background:#020509;color:#a0b8d0;font-family:'JetBrains Mono',monospace;font-size:12px;height:100vh;overflow:hidden;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:1fr 280px;grid-template-rows:40px 1fr;height:100vh}
+header{grid-column:1/-1;background:linear-gradient(180deg,#0a1628,#060e1c);border-bottom:1px solid #152540;display:flex;align-items:center;padding:0 12px;gap:10px}
+.logo{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;color:#fff}.logo span{color:#4ecfff}
+.lsub{font-size:8px;color:#2a4868;letter-spacing:3px;text-transform:uppercase}
+.hr{margin-left:auto;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.ch{display:inline-flex;align-items:center;gap:3px;padding:1px 4px;border:1px solid #152540;font-size:7px;color:#4a6a8a;background:rgba(6,14,28,0.8)}
+.cd{width:4px;height:4px;border-radius:50%}
+.bh{background:none;border:1px solid #152540;color:#4a6a8a;font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;letter-spacing:1px}
+.bh:hover{border-color:#4ecfff;color:#4ecfff}
+.gw{grid-column:1;grid-row:2;position:relative;overflow:hidden;background:#020509}
+.gw svg{width:100%;height:100%;display:block}
+.pl{position:absolute;top:6px;left:8px;font-size:8px;color:#2a4868;z-index:2}.pl b{color:#6a8aaa;font-weight:500}
+.vt{position:absolute;top:6px;right:8px;font-size:8px;color:#2a4868;z-index:2}
+.hb{position:absolute;bottom:6px;left:8px;background:rgba(6,12,22,0.95);border:1px solid #152540;padding:6px 10px;font-size:9px;color:#4a6a8a;max-width:260px;line-height:1.4;z-index:2}
+.hb strong{color:#4ecfff}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* RIGHT PANEL */
+.rp{grid-column:2;grid-row:2;border-left:1px solid #152540;background:linear-gradient(180deg,#080f1e,#040810);display:flex;flex-direction:column;overflow:hidden}
+.rs{border-bottom:1px solid #152540;padding:10px 12px}
+.rs:last-child{border-bottom:none;flex:1;overflow-y:auto}
+.rt{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#2a4868;margin-bottom:6px;font-weight:600}
+.tn{font-family:‘DM Sans’,sans-serif;font-size:14px;font-weight:700;color:#dce8f4;margin-bottom:2px}
+.tc{font-size:10px;margin-bottom:10px}
+.sb{display:flex;align-items:flex-start;gap:7px;padding:7px 8px;border:1px solid #152540;background:rgba(10,18,32,0.7);color:#a0b8d0;font-size:9px;cursor:pointer;text-align:left;margin-bottom:4px;transition:border-color .15s}
+.sb:hover{border-color:#4ecfff}
+.sb.on{border-color:#4ecfff;background:rgba(78,207,255,0.05);color:#dce8f4}
+.sb.off{opacity:.22;cursor:not-allowed;border-style:dashed}
+.sb.off:hover{border-color:#152540}
+.sd{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.sl{flex:1}.sld{font-size:8px;color:#2a4868;margin-top:1px;line-height:1.3}
+.sk{font-size:7px;color:#2a4868;font-style:italic;flex-shrink:0}
+.ir{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.il{font-size:8px;color:#4a6a8a;width:80px;flex-shrink:0;text-align:right}
+.it{flex:1;height:3px;background:rgba(21,37,64,0.4);border-radius:1px;overflow:hidden}
+.if{height:100%;border-radius:1px;transition:width .4s,background .3s}
+.iv{font-size:8px;width:22px;text-align:right}
+.pe{padding:4px 0;border-bottom:1px solid rgba(21,37,64,0.3);font-size:9px}
+.pe:last-child{border-bottom:none}
+.ps{color:#4ecfff;font-weight:600;margin-right:3px}
+.pf{color:#2a4868;font-size:8px;margin-top:1px;padding-left:10px}
 
-html { background: #030810 !important; color-scheme: dark; }
-
-body {
-background: #030810;
-color: #c0d0e0;
-font-family: ‘JetBrains Mono’, ui-monospace, monospace;
-font-size: 13px;
-height: 100vh;
-overflow: hidden;
--webkit-text-size-adjust: 100%;
--webkit-font-smoothing: antialiased;
-}
-
-.app {
-display: grid;
-grid-template-columns: 1fr 320px;
-grid-template-rows: 48px 1fr;
-height: 100vh;
-}
-
-/* === HEADER === */
-header {
-grid-column: 1 / -1;
-background: linear-gradient(180deg, #0c1a2e 0%, #081422 100%);
-border-bottom: 1px solid #1e3a5c;
-display: flex;
-align-items: center;
-padding: 0 18px;
-gap: 16px;
-}
-.logo { font-family: ‘DM Sans’, sans-serif; font-size: 15px; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
-.logo span { color: #4ecfff; }
-.logo-sub { font-size: 9px; color: #3a5a7c; letter-spacing: 3px; text-transform: uppercase; }
-.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
-.chip {
-display: inline-flex; align-items: center; gap: 4px;
-padding: 2px 7px; border: 1px solid #1e3a5c;
-font-size: 9px; color: #6a8aaa; background: rgba(10,20,34,0.6);
-letter-spacing: 0.5px;
-}
-.chip-dot { width: 6px; height: 6px; border-radius: 50%; }
-.btn-h {
-background: none; border: 1px solid #1e3a5c; color: #6a8aaa;
-font-family: ‘JetBrains Mono’, monospace; font-size: 9px;
-padding: 3px 10px; cursor: pointer; letter-spacing: 1px;
-transition: all 0.15s;
-}
-.btn-h:hover { border-color: #4ecfff; color: #4ecfff; }
-
-/* === GRAPH === */
-.graph-wrap {
-grid-column: 1; grid-row: 2;
-position: relative; overflow: hidden;
-background: #030810;
-}
-.graph-wrap svg { width: 100%; height: 100%; display: block; }
-
-.pos-lbl {
-position: absolute; top: 12px; left: 14px;
-font-size: 10px; color: #3a5a7c; letter-spacing: 1px; z-index: 2;
-}
-.pos-lbl b { color: #8ab0d0; font-weight: 500; }
-.hint-box {
-position: absolute; bottom: 12px; left: 14px;
-background: rgba(8,18,30,0.95); border: 1px solid #1e3a5c;
-padding: 8px 12px; font-size: 10px; color: #5a7a9a;
-max-width: 280px; line-height: 1.5; z-index: 2;
-backdrop-filter: blur(6px);
-}
-.hint-box strong { color: #4ecfff; font-weight: 600; }
-.ver-tag { position: absolute; bottom: 12px; right: 14px; font-size: 9px; color: #2a4a6c; z-index: 2; }
-
-/* === RIGHT PANEL === */
-.rpanel {
-grid-column: 2; grid-row: 2;
-border-left: 1px solid #1e3a5c;
-background: linear-gradient(180deg, #0a1424 0%, #060e1a 100%);
-display: flex; flex-direction: column;
-overflow: hidden;
-}
-.rp-sec {
-border-bottom: 1px solid #1e3a5c;
-padding: 12px 14px;
-}
-.rp-sec:last-child { border-bottom: none; flex: 1; overflow-y: auto; }
-.rp-title {
-font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
-color: #3a5a7c; margin-bottom: 8px; font-weight: 600;
-}
-
-/* === TOPIC DETAIL === */
-.t-name { font-family: ‘DM Sans’, sans-serif; font-size: 15px; font-weight: 700; color: #e0ecf6; margin-bottom: 2px; }
-.t-cur { font-size: 11px; margin-bottom: 12px; }
-
-.s-btn {
-display: flex; align-items: flex-start; gap: 9px;
-padding: 9px 10px; border: 1px solid #1e3a5c;
-background: rgba(12,22,38,0.7); color: #b0c4da;
-font-family: ‘JetBrains Mono’, monospace; font-size: 10px;
-cursor: pointer; text-align: left; margin-bottom: 5px;
-transition: border-color 0.15s, background 0.15s;
-}
-.s-btn:hover { border-color: #4ecfff; background: rgba(20,35,55,0.8); }
-.s-btn.on { border-color: #4ecfff; background: rgba(78,207,255,0.06); color: #e0ecf6; }
-.s-btn.off { opacity: 0.25; cursor: not-allowed; border-style: dashed; }
-.s-btn.off:hover { border-color: #1e3a5c; background: rgba(12,22,38,0.7); }
-.s-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
-.s-body { flex: 1; }
-.s-desc { font-size: 9px; color: #3a5a7c; margin-top: 1px; line-height: 1.4; }
-.s-lock { font-size: 8px; color: #3a5a7c; font-style: italic; flex-shrink: 0; }
-
-/* === IMPACT === */
-.imp-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.imp-lbl { font-size: 9px; color: #5a7a9a; width: 88px; flex-shrink: 0; text-align: right; }
-.imp-trk { flex: 1; height: 4px; background: rgba(30,58,92,0.3); border-radius: 2px; overflow: hidden; }
-.imp-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease, background 0.3s; }
-.imp-v { font-size: 9px; width: 24px; text-align: right; }
-
-/* === PATH LOG === */
-.p-entry { padding: 5px 0; border-bottom: 1px solid rgba(30,58,92,0.25); font-size: 10px; }
-.p-entry:last-child { border-bottom: none; }
-.p-step { color: #4ecfff; font-weight: 600; margin-right: 3px; }
-.p-fx { color: #3a5a7c; font-size: 9px; margin-top: 1px; padding-left: 12px; }
-
-/* === ANIMATIONS === */
-@keyframes pulse-edge {
-0%, 100% { opacity: 0.7; }
-50% { opacity: 1; }
-}
+/* Legend */
+.legend{position:absolute;bottom:6px;right:8px;display:flex;gap:8px;z-index:2;font-size:8px;color:#4a6a8a}
+.legend-item{display:flex;align-items:center;gap:3px}
+.legend-dot{width:6px;height:6px;border-radius:50%}
 </style>
 
 </head>
 <body>
 <div class="app">
+<header>
+<div class="logo">Geo<span>Intel</span></div>
+<div class="lsub">CHESS Navigator</div>
+<div class="hr"><div id="hc"></div>
+<button class="bh" onclick="undo()">UNDO</button>
+<button class="bh" onclick="reset()">RESET</button>
+</div>
+</header>
 
-  <header>
-    <div class="logo">Geo<span>Intel</span></div>
-    <div class="logo-sub">CHESS Navigator</div>
-    <div class="hdr-right">
-      <div id="hdr-chips"></div>
-      <button class="btn-h" onclick="undoLast()">UNDO</button>
-      <button class="btn-h" onclick="resetAll()">RESET</button>
-    </div>
-  </header>
+<div class="gw" id="gw">
+<div class="pl" id="pl"></div>
+<div class="vt">v1.1.0</div>
+<svg id="svg"></svg>
+<div class="hb"><strong>CHESS</strong> -- 19 geopolitical topics on world map. Click nodes to explore scenarios. Dashed = locked preconditions.</div>
+<div class="legend">
+<div class="legend-item"><div class="legend-dot" style="background:#4eb8ff"></div>S1 Base</div>
+<div class="legend-item"><div class="legend-dot" style="background:#ffaa00"></div>S2 Escalation</div>
+<div class="legend-item"><div class="legend-dot" style="background:#ff4466"></div>S3 Crisis</div>
+<div class="legend-item"><div class="legend-dot" style="border:1px dashed #4a6a8a;background:none"></div>Orbital=Global</div>
+</div>
+</div>
 
-  <div class="graph-wrap" id="gw">
-    <div class="pos-lbl" id="pos-lbl"></div>
-    <svg id="svg"></svg>
-    <div class="hint-box"><strong>CHESS</strong> -- Click a node, then transition its scenario from the panel. Dashed edges = locked preconditions. Path log tracks your journey.</div>
-    <div class="ver-tag">v1.0.1</div>
-  </div>
-
-  <div class="rpanel">
-    <div class="rp-sec">
-      <div class="rp-title">Topic</div>
-      <div id="tp"><span style="color:#3a5a7c;font-size:10px">Click a node</span></div>
-    </div>
-    <div class="rp-sec">
-      <div class="rp-title">Impact -- Position</div>
-      <div id="imp"></div>
-    </div>
-    <div class="rp-sec">
-      <div class="rp-title">Path Log</div>
-      <div id="plog"><span style="color:#3a5a7c;font-size:10px">No transitions yet.</span></div>
-    </div>
-  </div>
-
+<div class="rp">
+<div class="rs"><div class="rt">Topic</div><div id="tp"><span style="color:#2a4868;font-size:9px">Click a node</span></div></div>
+<div class="rs"><div class="rt">Impact</div><div id="imp"></div></div>
+<div class="rs"><div class="rt">Path Log</div><div id="plog"><span style="color:#2a4868;font-size:9px">No transitions yet.</span></div></div>
+</div>
 </div>
 
 <script>
-var CS1="#4eb8ff", CS2="#ffaa00", CS3="#ff4466", CA="#4ecfff", CT3="#3a5a7c";
-var CS1g="#1a6aaa", CS2g="#aa7700", CS3g="#aa2244";
+// COLORS
+var C1="#4eb8ff",C2="#ffaa00",C3="#ff4466",CA="#4ecfff";
+function sc(l){return l===1?C1:l===2?C2:C3}
 
-var TOPICS=[
-  {id:"iran",name:"Iran / Middle East",short:"IRAN",sc:[
-    {l:"S1 \u2014 Base",d:"Proxy war, Hormuz operational",pc:null},
-    {l:"S2 \u2014 Escalation",d:"US strikes; Hormuz partially disrupted",pc:null},
-    {l:"S3 \u2014 Full Conflict",d:"Direct US-Iran war; Hormuz closed >30d",pc:null}]},
-  {id:"russia",name:"Russia \u2014 Ukraine",short:"RUS-UKR",sc:[
-    {l:"S1 \u2014 Stalemate",d:"Prolonged attrition, no decisive offensive",pc:null},
-    {l:"S2 \u2014 Escalation",d:"Russian offensive expands; Article 5 consultation",pc:null},
-    {l:"S3 \u2014 Collapse",d:"Ukrainian collapse or Article 5 invocation",pc:function(S){return S.iran>=2},pt:"Requires Iran \u2265 S2"}]},
-  {id:"china",name:"China \u2014 Taiwan",short:"CHN-TWN",sc:[
-    {l:"S1 \u2014 Deterrence",d:"US deterrence intact",pc:null},
-    {l:"S2 \u2014 Coercion",d:"China naval pressure; US credibility questioned",pc:function(S){return S.iran>=2},pt:"Requires Iran \u2265 S2"},
-    {l:"S3 \u2014 Conflict",d:"Military action; TSMC disruption",pc:function(S){return S.iran>=3&&S.russia>=2},pt:"Iran=S3 + Russia\u2265S2"}]},
-  {id:"europe",name:"Europe",short:"EU",sc:[
-    {l:"S1 \u2014 Fragmented",d:"EU governance under stress",pc:null},
-    {l:"S2 \u2014 Crisis",d:"Political crisis blocks EU response",pc:null},
-    {l:"S3 \u2014 Energy Indep.",d:"Structural EU energy decoupling",pc:function(S){return S.russia>=2},pt:"Requires Russia \u2265 S2"}]}
+// ============================================================
+// 19 TOPICS - 6 wedges
+// Regional: positioned on map
+// Trans-geographic: orbital ring
+// ============================================================
+// Positions are in % of viewport (x,y) using Mercator-ish projection
+// Map center roughly: 0.48, 0.45
+
+var T=[
+// === MIL (Military) ===
+{id:"iran",n:"Iran / Middle East",s:"IRAN",w:"MIL",
+ geo:true,px:0.57,py:0.42,
+ sc:[{l:"S1 Base",d:"Proxy tensions, Hormuz open"},{l:"S2 Escalation",d:"US strikes; Hormuz disrupted"},{l:"S3 Full Conflict",d:"Direct war; Hormuz closed"}]},
+
+{id:"ruukr",n:"Russia-Ukraine",s:"RUS-UKR",w:"MIL",
+ geo:true,px:0.54,py:0.25,
+ sc:[{l:"S1 Stalemate",d:"Prolonged attrition"},{l:"S2 Escalation",d:"Offensive expands; Art.5 talk"},{l:"S3 Collapse",d:"Territorial collapse / Art.5",pc:function(G){return G.iran>=2},pt:"Iran\u2265S2"}]},
+
+{id:"chtw",n:"China-Taiwan",s:"CHN-TWN",w:"MIL",
+ geo:true,px:0.78,py:0.40,
+ sc:[{l:"S1 Deterrence",d:"Status quo maintained"},{l:"S2 Coercion",d:"Naval pressure; US credibility tested",pc:function(G){return G.iran>=2},pt:"Iran\u2265S2"},{l:"S3 Conflict",d:"Military action; TSMC disrupted",pc:function(G){return G.iran>=3&&G.ruukr>=2},pt:"Iran=S3 + Rus\u2265S2"}]},
+
+{id:"indpk",n:"India-Pakistan",s:"IND-PAK",w:"MIL",
+ geo:true,px:0.66,py:0.42,
+ sc:[{l:"S1 Managed",d:"Tensions contained"},{l:"S2 Escalation",d:"Border crisis; nuclear posturing"},{l:"S3 Conflict",d:"Limited war; nuclear threshold"}]},
+
+{id:"nkor",n:"North Korea",s:"N.KOREA",w:"MIL",
+ geo:true,px:0.80,py:0.30,
+ sc:[{l:"S1 Contained",d:"Provocations within norms"},{l:"S2 Crisis",d:"ICBM tests; sea blockade"},{l:"S3 Conflict",d:"Peninsula conflict",pc:function(G){return G.chtw>=2},pt:"China-Tw\u2265S2"}]},
+
+// === ENE (Energy) ===
+{id:"enshock",n:"Energy Shock",s:"ENERGY",w:"ENE",
+ geo:false,ox:0.08,oy:0.20,
+ sc:[{l:"S1 Volatile",d:"Price swings within range"},{l:"S2 Spike",d:"Sustained >$120 Brent",pc:function(G){return G.iran>=2||G.ruukr>=2},pt:"Iran\u2265S2 or Rus\u2265S2"},{l:"S3 Crisis",d:"Supply collapse >6mo",pc:function(G){return G.iran>=3},pt:"Iran=S3"}]},
+
+{id:"food",n:"Food Security",s:"FOOD",w:"ENE",
+ geo:false,ox:0.08,oy:0.35,
+ sc:[{l:"S1 Stressed",d:"Regional shortages"},{l:"S2 Crisis",d:"Global grain disruption",pc:function(G){return G.ruukr>=2||G.enshock>=2},pt:"Rus\u2265S2 or Energy\u2265S2"},{l:"S3 Famine risk",d:"Multiple breadbaskets fail",pc:function(G){return G.ruukr>=3&&G.enshock>=2},pt:"Rus=S3 + Energy\u2265S2"}]},
+
+// === FIN (Financial) ===
+{id:"trdwar",n:"Trade War",s:"TRADE WAR",w:"FIN",
+ geo:false,ox:0.08,oy:0.52,
+ sc:[{l:"S1 Friction",d:"Targeted tariffs"},{l:"S2 Escalation",d:"Broad tariffs; WTO bypassed"},{l:"S3 Fragmentation",d:"Bloc-based trade; decoupling"}]},
+
+{id:"debtcr",n:"Debt Crisis",s:"DEBT",w:"FIN",
+ geo:false,ox:0.08,oy:0.67,
+ sc:[{l:"S1 Elevated",d:"Spreads manageable"},{l:"S2 Stress",d:"EM sovereign defaults",pc:function(G){return G.trdwar>=2||G.enshock>=2},pt:"Trade\u2265S2 or Energy\u2265S2"},{l:"S3 Contagion",d:"Systemic cascade",pc:function(G){return G.debtcr>=2&&G.trdwar>=2},pt:"Debt=S2 + Trade\u2265S2"}]},
+
+{id:"sanctions",n:"Sanctions Regime",s:"SANCTIONS",w:"FIN",
+ geo:false,ox:0.08,oy:0.82,
+ sc:[{l:"S1 Targeted",d:"Sectoral, manageable"},{l:"S2 Broad",d:"Secondary sanctions; evasion",pc:function(G){return G.iran>=2||G.ruukr>=2},pt:"Iran\u2265S2 or Rus\u2265S2"},{l:"S3 Weaponized",d:"SWIFT exclusions; dollar weapon",pc:function(G){return G.iran>=3||G.ruukr>=3},pt:"Iran=S3 or Rus=S3"}]},
+
+// === HYB (Hybrid) ===
+{id:"cyber",n:"Cyber Warfare",s:"CYBER",w:"HYB",
+ geo:false,ox:0.92,oy:0.20,
+ sc:[{l:"S1 Persistent",d:"Espionage; probing"},{l:"S2 Attacks",d:"Critical infrastructure hit",pc:function(G){return G.ruukr>=2||G.chtw>=2},pt:"Rus\u2265S2 or China\u2265S2"},{l:"S3 Systemic",d:"Multi-sector cascading failure",pc:function(G){return G.ruukr>=3||G.chtw>=3},pt:"Rus=S3 or China=S3"}]},
+
+{id:"disinfo",n:"Disinformation",s:"DISINFO",w:"HYB",
+ geo:false,ox:0.92,oy:0.35,
+ sc:[{l:"S1 Active",d:"State campaigns ongoing"},{l:"S2 Electoral",d:"Election interference; unrest",pc:function(G){return G.cyber>=2},pt:"Cyber\u2265S2"},{l:"S3 Destabilize",d:"Democratic institutions eroded",pc:function(G){return G.cyber>=2&&G.eupol>=2},pt:"Cyber\u2265S2 + EU\u2265S2"}]},
+
+// === POL (Political) ===
+{id:"eupol",n:"EU Political Crisis",s:"EU-POL",w:"POL",
+ geo:true,px:0.47,py:0.28,
+ sc:[{l:"S1 Fragmented",d:"Governance under stress"},{l:"S2 Crisis",d:"Blocks collective response"},{l:"S3 Structural",d:"Treaty-level dispute; exit risk",pc:function(G){return G.ruukr>=2&&G.trdwar>=2},pt:"Rus\u2265S2 + Trade\u2265S2"}]},
+
+{id:"uspol",n:"US Political Risk",s:"US-POL",w:"POL",
+ geo:true,px:0.20,py:0.32,
+ sc:[{l:"S1 Polarized",d:"Institutional friction"},{l:"S2 Institutional",d:"Constitutional crisis"},{l:"S3 Paralysis",d:"Government dysfunction; alliance doubt"}]},
+
+{id:"latam",n:"Latin America",s:"LATAM",w:"POL",
+ geo:true,px:0.24,py:0.60,
+ sc:[{l:"S1 Unstable",d:"Populist pressures"},{l:"S2 Crisis",d:"Major state failure / migration surge"},{l:"S3 Regional",d:"Multi-country instability",pc:function(G){return G.debtcr>=2},pt:"Debt\u2265S2"}]},
+
+{id:"africa",n:"Africa Instability",s:"AFRICA",w:"POL",
+ geo:true,px:0.48,py:0.55,
+ sc:[{l:"S1 Localized",d:"Regional conflicts contained"},{l:"S2 Spreading",d:"Sahel+ collapse; migration",pc:function(G){return G.food>=2},pt:"Food\u2265S2"},{l:"S3 Continental",d:"Multi-region state failure",pc:function(G){return G.food>=3&&G.debtcr>=2},pt:"Food=S3 + Debt\u2265S2"}]},
+
+// === TEC (Technology) ===
+{id:"airace",n:"AI Race",s:"AI RACE",w:"TEC",
+ geo:false,ox:0.92,oy:0.52,
+ sc:[{l:"S1 Competition",d:"Regulated rivalry"},{l:"S2 Weaponized",d:"Military AI deployment",pc:function(G){return G.chtw>=2||G.trdwar>=2},pt:"China\u2265S2 or Trade\u2265S2"},{l:"S3 Uncontrolled",d:"Autonomous weapons; no governance",pc:function(G){return G.chtw>=3},pt:"China=S3"}]},
+
+{id:"techdc",n:"Tech Decoupling",s:"TECH-DC",w:"TEC",
+ geo:false,ox:0.92,oy:0.67,
+ sc:[{l:"S1 Partial",d:"Chip controls; selective"},{l:"S2 Broad",d:"Full stack separation",pc:function(G){return G.trdwar>=2||G.chtw>=2},pt:"Trade\u2265S2 or China\u2265S2"},{l:"S3 Blocs",d:"Parallel tech ecosystems",pc:function(G){return G.trdwar>=3&&G.chtw>=2},pt:"Trade=S3 + China\u2265S2"}]},
+
+{id:"space",n:"Space Militarization",s:"SPACE",w:"TEC",
+ geo:false,ox:0.92,oy:0.82,
+ sc:[{l:"S1 Dual-use",d:"Civil-military ambiguity"},{l:"S2 Contested",d:"ASAT tests; debris events",pc:function(G){return G.airace>=2},pt:"AI\u2265S2"},{l:"S3 Weaponized",d:"Active space warfare",pc:function(G){return G.airace>=3&&G.chtw>=3},pt:"AI=S3 + China=S3"}]}
 ];
 
+// ============================================================
+// EDGES - ~40 interdependencies
+// ============================================================
 var EDGES=[
-  {f:"iran",t:"russia",lb:"Iran\u2265S2 unlocks\nRussia S3",ck:function(S){return S.iran>=2}},
-  {f:"iran",t:"china",lb:"Iran\u2265S2 unlocks\nChina S2",ck:function(S){return S.iran>=2}},
-  {f:"iran",t:"china",lb:"Iran=S3+Rus\u2265S2\nunlocks China S3",ck:function(S){return S.iran>=3&&S.russia>=2},sec:true},
-  {f:"russia",t:"europe",lb:"Russia\u2265S2 unlocks\nEurope S3",ck:function(S){return S.russia>=2}}
+// MIL cascades
+{f:"iran",t:"ruukr",lb:"distraction"},{f:"iran",t:"enshock",lb:"oil"},{f:"iran",t:"sanctions",lb:"triggers"},
+{f:"ruukr",t:"eupol",lb:"pressure"},{f:"ruukr",t:"enshock",lb:"gas"},{f:"ruukr",t:"food",lb:"grain"},
+{f:"ruukr",t:"cyber",lb:"hybrid"},{f:"ruukr",t:"sanctions",lb:"expands"},
+{f:"chtw",t:"techdc",lb:"accelerates"},{f:"chtw",t:"trdwar",lb:"escalates"},{f:"chtw",t:"cyber",lb:"offensive"},
+{f:"chtw",t:"airace",lb:"military AI"},{f:"chtw",t:"nkor",lb:"emboldens"},
+{f:"indpk",t:"nkor",lb:"nuclear link"},{f:"indpk",t:"food",lb:"breadbasket"},
+{f:"nkor",t:"airace",lb:"proliferation"},
+// ENE cascades
+{f:"enshock",t:"food",lb:"input costs"},{f:"enshock",t:"debtcr",lb:"fiscal"},{f:"enshock",t:"trdwar",lb:"retaliation"},
+{f:"enshock",t:"eupol",lb:"cost of living"},
+{f:"food",t:"africa",lb:"famine"},{f:"food",t:"latam",lb:"instability"},{f:"food",t:"eupol",lb:"migration"},
+// FIN cascades
+{f:"trdwar",t:"techdc",lb:"decoupling"},{f:"trdwar",t:"debtcr",lb:"growth shock"},{f:"trdwar",t:"eupol",lb:"division"},
+{f:"debtcr",t:"latam",lb:"contagion"},{f:"debtcr",t:"africa",lb:"default"},
+{f:"sanctions",t:"trdwar",lb:"fragments"},{f:"sanctions",t:"debtcr",lb:"stress"},
+// HYB cascades
+{f:"cyber",t:"disinfo",lb:"enables"},{f:"cyber",t:"enshock",lb:"grid attack"},
+{f:"disinfo",t:"eupol",lb:"undermines"},{f:"disinfo",t:"uspol",lb:"polarizes"},
+// POL cascades
+{f:"uspol",t:"trdwar",lb:"policy shift"},{f:"uspol",t:"ruukr",lb:"alliance doubt"},
+{f:"eupol",t:"sanctions",lb:"weakens"},{f:"eupol",t:"ruukr",lb:"resolve"},
+// TEC cascades
+{f:"airace",t:"cyber",lb:"capabilities"},{f:"airace",t:"space",lb:"dual-use"},
+{f:"techdc",t:"airace",lb:"competition"},{f:"techdc",t:"sanctions",lb:"controls"},
+{f:"space",t:"cyber",lb:"ISR"}
 ];
 
-var IM={
-  iran:{s1:{inf:0,gdp:0,ir:0,bnd:0,btp:0,com:0,cyb:0,bi:0},s2:{inf:3,gdp:2,ir:1,bnd:1,btp:2,com:4,cyb:1,bi:3},s3:{inf:5,gdp:4,ir:3,bnd:3,btp:4,com:5,cyb:2,bi:5}},
-  russia:{s1:{inf:1,gdp:1,ir:0,bnd:0,btp:1,com:1,cyb:1,bi:1},s2:{inf:3,gdp:2,ir:1,bnd:2,btp:3,com:3,cyb:3,bi:2},s3:{inf:4,gdp:4,ir:2,bnd:4,btp:5,com:4,cyb:4,bi:4}},
-  china:{s1:{inf:0,gdp:0,ir:0,bnd:0,btp:0,com:0,cyb:1,bi:0},s2:{inf:2,gdp:2,ir:1,bnd:1,btp:1,com:2,cyb:3,bi:3},s3:{inf:5,gdp:5,ir:3,bnd:3,btp:3,com:4,cyb:5,bi:5}},
-  europe:{s1:{inf:1,gdp:1,ir:0,bnd:1,btp:2,com:0,cyb:0,bi:0},s2:{inf:2,gdp:2,ir:1,bnd:3,btp:4,com:1,cyb:1,bi:1},s3:{inf:2,gdp:1,ir:1,bnd:1,btp:1,com:2,cyb:0,bi:1}}
-};
-var IK=[{k:"inf",n:"Inflation"},{k:"gdp",n:"GDP Growth"},{k:"ir",n:"Interest Rates"},{k:"bnd",n:"Bund Spread"},{k:"btp",n:"BTP Spread"},{k:"com",n:"Commodity"},{k:"cyb",n:"Cyber"},{k:"bi",n:"Op. Disruption"}];
+// Impact (simplified: per-topic max by scenario level)
+var IK=[{k:"inf",n:"Inflation"},{k:"gdp",n:"GDP"},{k:"ir",n:"Rates"},{k:"bnd",n:"Bund"},{k:"btp",n:"BTP"},{k:"com",n:"Commodity"},{k:"cyb",n:"Cyber"},{k:"bi",n:"Disruption"}];
 
-var S={iran:1,russia:1,china:1,europe:1}, sel=null, plog=[], hist=[];
+// Generic impact: S1=0-1, S2=2-3, S3=4-5 depending on topic relevance
+function topicImpact(tid,lv){
+  var base={inf:0,gdp:0,ir:0,bnd:0,btp:0,com:0,cyb:0,bi:0};
+  if(lv===1)return base;
+  var profiles={
+    iran:{inf:1,gdp:1,ir:0,bnd:0,btp:1,com:2,cyb:0,bi:1},
+    ruukr:{inf:1,gdp:1,ir:0,bnd:1,btp:1,com:1,cyb:1,bi:1},
+    chtw:{inf:1,gdp:2,ir:1,bnd:1,btp:1,com:1,cyb:1,bi:2},
+    indpk:{inf:0,gdp:1,ir:0,bnd:0,btp:0,com:0,cyb:0,bi:1},
+    nkor:{inf:0,gdp:1,ir:0,bnd:1,btp:1,com:0,cyb:1,bi:0},
+    enshock:{inf:2,gdp:1,ir:1,bnd:0,btp:1,com:2,cyb:0,bi:1},
+    food:{inf:2,gdp:1,ir:0,bnd:0,btp:1,com:1,cyb:0,bi:1},
+    trdwar:{inf:1,gdp:2,ir:1,bnd:1,btp:1,com:1,cyb:0,bi:1},
+    debtcr:{inf:0,gdp:2,ir:2,bnd:2,btp:2,com:0,cyb:0,bi:0},
+    sanctions:{inf:1,gdp:1,ir:0,bnd:1,btp:1,com:1,cyb:0,bi:1},
+    cyber:{inf:0,gdp:1,ir:0,bnd:1,btp:1,com:0,cyb:2,bi:2},
+    disinfo:{inf:0,gdp:0,ir:0,bnd:1,btp:1,com:0,cyb:1,bi:0},
+    eupol:{inf:0,gdp:1,ir:1,bnd:2,btp:2,com:0,cyb:0,bi:0},
+    uspol:{inf:0,gdp:1,ir:1,bnd:1,btp:0,com:0,cyb:0,bi:0},
+    latam:{inf:0,gdp:1,ir:0,bnd:0,btp:0,com:0,cyb:0,bi:0},
+    africa:{inf:0,gdp:0,ir:0,bnd:0,btp:0,com:0,cyb:0,bi:0},
+    airace:{inf:0,gdp:1,ir:0,bnd:0,btp:0,com:0,cyb:2,bi:1},
+    techdc:{inf:1,gdp:1,ir:0,bnd:0,btp:0,com:1,cyb:1,bi:1},
+    space:{inf:0,gdp:0,ir:0,bnd:0,btp:0,com:0,cyb:1,bi:1}
+  };
+  var p=profiles[tid]||base;
+  var r={};for(var k in p)r[k]=Math.min(5,p[k]*lv);
+  return r;
+}
 
-function sc(l){return l===1?CS1:l===2?CS2:CS3}
-function scg(l){return l===1?CS1g:l===2?CS2g:CS3g}
-function avail(t,i){var s=t.sc[i-1];if(!s)return false;if(!s.pc)return true;return s.pc(S)}
-function eq(){var ch=[];for(var i=0;i<TOPICS.length;i++){var t=TOPICS[i],c=S[t.id];if(!avail(t,c)){var b=1;for(var j=c-1;j>=1;j--)if(avail(t,j)){b=j;break}ch.push({t:t,f:c,to:b});S[t.id]=b}}return ch}
-function agg(){var a={};for(var i=0;i<IK.length;i++)a[IK[i].k]=0;for(var i=0;i<TOPICS.length;i++){var m=IM[TOPICS[i].id]["s"+S[TOPICS[i].id]];for(var k in m)if(a[k]!==undefined)a[k]=Math.max(a[k],m[k])}return a}
+// ============================================================
+// STATE
+// ============================================================
+var G={};for(var i=0;i<T.length;i++)G[T[i].id]=1;
+var sel=null,plog=[],hist=[];
+
+function avail(t,si){var s=t.sc[si-1];if(!s)return false;if(!s.pc)return true;return s.pc(G)}
+function eq(){var ch=[];for(var i=0;i<T.length;i++){var t=T[i],c=G[t.id];if(!avail(t,c)){var b=1;for(var j=c-1;j>=1;j--)if(avail(t,j)){b=j;break}ch.push({t:t,f:c,to:b});G[t.id]=b}}return ch}
+function agg(){var a={};for(var i=0;i<IK.length;i++)a[IK[i].k]=0;for(var i=0;i<T.length;i++){var m=topicImpact(T[i].id,G[T[i].id]);for(var k in m)if(a[k]!==undefined)a[k]=Math.max(a[k],m[k])}return a}
 
 function sv(tag,at){var e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(var k in at)e.setAttribute(k,at[k]);return e}
 
-var NP={iran:{x:0.27,y:0.34},russia:{x:0.73,y:0.3},china:{x:0.23,y:0.72},europe:{x:0.77,y:0.72}};
-var NR=46;
+// ============================================================
+// WORLD MAP CONTOURS (simplified SVG paths)
+// Mercator-ish, coordinates in viewBox 0-1000 x 0-600
+// ============================================================
+var MAP_PATHS=[
+// North America
+"M 120,120 L 140,105 160,100 180,95 200,100 220,95 250,100 270,110 280,130 275,150 260,170 240,185 230,200 220,220 210,240 200,250 195,270 200,290 210,310 220,320 230,340 225,350 215,345 200,330 180,320 165,310 150,300 140,280 130,260 120,240 115,220 110,200 105,180 108,160 112,140 Z",
+// South America
+"M 230,340 L 240,360 250,380 260,400 265,420 270,440 268,460 260,480 250,490 240,500 230,505 225,490 220,470 218,450 220,430 225,410 228,390 230,370 Z",
+// Europe
+"M 430,100 L 445,95 460,100 475,105 490,110 500,120 505,130 510,140 500,150 490,155 480,160 470,165 460,165 450,160 440,155 435,150 430,140 425,130 428,115 Z",
+// Africa
+"M 440,200 L 460,195 475,200 490,210 500,230 510,250 515,270 520,290 518,310 510,330 500,345 490,355 480,360 465,355 450,345 440,330 435,310 432,290 430,270 432,250 435,230 438,210 Z",
+// Russia/Central Asia
+"M 500,80 L 530,75 560,78 590,80 620,82 650,80 680,78 710,80 740,85 760,90 770,100 760,110 740,115 710,118 680,120 650,118 620,115 590,112 560,110 530,108 510,115 505,130 500,120 498,100 Z",
+// Middle East
+"M 510,170 L 530,165 545,170 555,180 560,195 555,210 545,215 530,210 520,200 515,185 Z",
+// India
+"M 600,190 L 620,185 635,195 640,210 638,230 630,245 620,255 610,250 605,235 600,220 598,205 Z",
+// China
+"M 660,130 L 690,125 720,130 740,140 755,155 760,170 755,185 740,190 720,188 700,185 680,180 665,170 660,155 658,140 Z",
+// SE Asia
+"M 700,210 L 720,205 735,210 745,225 740,240 730,245 715,240 705,230 700,220 Z",
+// Japan/Korea
+"M 770,140 L 780,135 785,145 782,160 775,165 770,155 Z",
+// Australia
+"M 740,330 L 765,325 790,330 805,345 810,365 800,380 785,385 765,382 750,375 742,360 738,345 Z"
+];
+
+// ============================================================
+// RENDER
+// ============================================================
+var NR=22; // node radius (smaller for 19 nodes)
 
 function renderG(){
   var svg=document.getElementById("svg"),gw=document.getElementById("gw");
   var W=gw.clientWidth,H=gw.clientHeight;
   svg.innerHTML="";
 
+  // ViewBox scaling for map
+  var vw=1000,vh=600;
+  var sx=W/vw,sy=H/vh;
+
   // BG
-  svg.appendChild(sv("rect",{x:0,y:0,width:W,height:H,fill:"#030810"}));
+  svg.appendChild(sv("rect",{x:0,y:0,width:W,height:H,fill:"#020509"}));
 
-  // Radial subtle glow center
   var defs=sv("defs",{});
-  var rg=sv("radialGradient",{id:"bgGlow",cx:"50%",cy:"50%",r:"50%"});
-  rg.appendChild(sv("stop",{offset:"0%","stop-color":"#0c1e34","stop-opacity":"0.4"}));
-  rg.appendChild(sv("stop",{offset:"100%","stop-color":"#030810","stop-opacity":"0"}));
-  defs.appendChild(rg);
-
-  // Node gradients
-  for(var i=0;i<TOPICS.length;i++){
-    var t=TOPICS[i],lv=S[t.id],col=sc(lv),colg=scg(lv);
-    var ng=sv("radialGradient",{id:"ng-"+t.id,cx:"35%",cy:"35%",r:"65%"});
-    ng.appendChild(sv("stop",{offset:"0%","stop-color":col,"stop-opacity":"0.15"}));
-    ng.appendChild(sv("stop",{offset:"100%","stop-color":colg,"stop-opacity":"0.03"}));
-    defs.appendChild(ng);
-    // Glow filter
-    var fl=sv("filter",{id:"gf-"+t.id,x:"-50%",y:"-50%",width:"200%",height:"200%"});
-    var gb=sv("feGaussianBlur",{"in":"SourceGraphic",stdDeviation:"12"});
-    fl.appendChild(gb);
-    defs.appendChild(fl);
-  }
-
-  // Arrow markers
-  var mkA=sv("marker",{id:"aA",viewBox:"0 0 12 8",refX:"11",refY:"4",markerWidth:"10",markerHeight:"7",orient:"auto"});
-  mkA.appendChild(sv("path",{d:"M 0 0 L 12 4 L 0 8 L 3 4 Z",fill:CA,opacity:"0.9"}));
-  defs.appendChild(mkA);
-  var mkI=sv("marker",{id:"aI",viewBox:"0 0 12 8",refX:"11",refY:"4",markerWidth:"10",markerHeight:"7",orient:"auto"});
-  mkI.appendChild(sv("path",{d:"M 0 0 L 12 4 L 0 8 L 3 4 Z",fill:"#1e3a5c",opacity:"0.5"}));
-  defs.appendChild(mkI);
-
+  // Glow filter
+  var gf=sv("filter",{id:"glow",x:"-50%",y:"-50%",width:"200%",height:"200%"});
+  gf.appendChild(sv("feGaussianBlur",{"in":"SourceGraphic",stdDeviation:"8"}));
+  defs.appendChild(gf);
+  // Arrow active
+  var ma=sv("marker",{id:"aA",viewBox:"0 0 10 7",refX:"9",refY:"3.5",markerWidth:"8",markerHeight:"6",orient:"auto"});
+  ma.appendChild(sv("path",{d:"M 0 0 L 10 3.5 L 0 7 L 2.5 3.5 Z",fill:CA,opacity:"0.8"}));
+  defs.appendChild(ma);
+  // Arrow inactive
+  var mi=sv("marker",{id:"aI",viewBox:"0 0 10 7",refX:"9",refY:"3.5",markerWidth:"8",markerHeight:"6",orient:"auto"});
+  mi.appendChild(sv("path",{d:"M 0 0 L 10 3.5 L 0 7 L 2.5 3.5 Z",fill:"#1a3050",opacity:"0.5"}));
+  defs.appendChild(mi);
   svg.appendChild(defs);
 
-  // BG glow
-  svg.appendChild(sv("circle",{cx:W*0.5,cy:H*0.5,r:Math.min(W,H)*0.4,fill:"url(#bgGlow)"}));
+  // Draw map contours
+  for(var m=0;m<MAP_PATHS.length;m++){
+    // Scale path coordinates
+    var pathStr=MAP_PATHS[m].replace(/(\d+\.?\d*),(\d+\.?\d*)/g,function(match,x,y){
+      return (parseFloat(x)*sx)+","+(parseFloat(y)*sy);
+    });
+    svg.appendChild(sv("path",{d:pathStr,fill:"none",stroke:"#0e1e30","stroke-width":"1.2",opacity:"0.5"}));
+    svg.appendChild(sv("path",{d:pathStr,fill:"#060d18",opacity:"0.3"}));
+  }
 
-  // Subtle grid dots
-  for(var gx=40;gx<W;gx+=40){
-    for(var gy=40;gy<H;gy+=40){
-      svg.appendChild(sv("circle",{cx:gx,cy:gy,r:"0.5",fill:"#1a2a3c",opacity:"0.4"}));
+  // Compute node pixel positions
+  var nodePos={};
+  for(var i=0;i<T.length;i++){
+    var t=T[i];
+    if(t.geo){
+      nodePos[t.id]={x:t.px*W,y:t.py*H};
+    } else {
+      nodePos[t.id]={x:t.ox*W,y:t.oy*H};
     }
   }
 
-  // EDGES
+  // Draw edges
   for(var e=0;e<EDGES.length;e++){
     var edge=EDGES[e];
-    var fp=NP[edge.f],tp=NP[edge.t];
-    var x1=fp.x*W,y1=fp.y*H,x2=tp.x*W,y2=tp.y*H;
-    var off=edge.sec?20:0;
-    var dx=x2-x1,dy=y2-y1,dist=Math.sqrt(dx*dx+dy*dy);
-    var ux=dx/dist,uy=dy/dist,px=-uy,py=ux;
-    var sx=x1+ux*(NR+12)+px*off,sy=y1+uy*(NR+12)+py*off;
-    var ex=x2-ux*(NR+16)+px*off,ey=y2-uy*(NR+16)+py*off;
-    var mx=(sx+ex)/2+px*(35+off*0.5),my=(sy+ey)/2+py*(35+off*0.5);
-    var act=edge.ck(S);
-    var pathD="M "+sx+" "+sy+" Q "+mx+" "+my+" "+ex+" "+ey;
+    var fp=nodePos[edge.f],tp=nodePos[edge.t];
+    if(!fp||!tp)continue;
+    var dx=tp.x-fp.x,dy=tp.y-fp.y;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<1)continue;
+    var ux=dx/dist,uy=dy/dist;
+    var ssx=fp.x+ux*(NR+4),ssy=fp.y+uy*(NR+4);
+    var eex=tp.x-ux*(NR+6),eey=tp.y-uy*(NR+6);
 
-    // Glow behind active edge
+    // Check if any precondition on target references source
+    var act=false;
+    // Edge is "active" if both endpoints are above S1
+    var srcLv=G[edge.f],tgtLv=G[edge.t];
+    if(srcLv>=2||tgtLv>=2)act=true;
+
+    // Curve: perpendicular offset
+    var px=-uy,py=ux;
+    var curveAmt=Math.min(dist*0.15,30);
+    var mx=(ssx+eex)/2+px*curveAmt,my=(ssy+eey)/2+py*curveAmt;
+    var pathD="M "+ssx+" "+ssy+" Q "+mx+" "+my+" "+eex+" "+eey;
+
     if(act){
-      svg.appendChild(sv("path",{d:pathD,stroke:CA,"stroke-width":"6",fill:"none",opacity:"0.08"}));
+      svg.appendChild(sv("path",{d:pathD,stroke:CA,"stroke-width":"4",fill:"none",opacity:"0.06"}));
     }
 
     svg.appendChild(sv("path",{
-      d:pathD,stroke:act?CA:"#1e3a5c",
-      "stroke-width":act?"2":"1.2",
-      "stroke-dasharray":act?"none":"5 4",
-      opacity:act?"0.8":"0.25",fill:"none",
+      d:pathD,
+      stroke:act?CA:"#1a3050",
+      "stroke-width":act?"1.5":"0.8",
+      "stroke-dasharray":act?"none":"3 3",
+      opacity:act?"0.6":"0.35",
+      fill:"none",
       "marker-end":act?"url(#aA)":"url(#aI)"
     }));
 
-    // Label
-    var lx=mx,ly=my-10;
-    var lines=edge.lb.split("\n");
-    var txt=sv("text",{x:lx,y:ly,"text-anchor":"middle","font-family":"'JetBrains Mono',monospace","font-size":"8",fill:act?CA:"#1e3a5c",opacity:act?"0.85":"0.35"});
-    for(var li=0;li<lines.length;li++){
-      var ts=sv("tspan",{x:lx,dy:li===0?"0":"10"});
-      ts.textContent=lines[li];
-      txt.appendChild(ts);
+    // Edge label (only on hover/active -- skip for cleanliness with 40 edges)
+    if(act){
+      var lx=(ssx+eex)/2+px*(curveAmt+8),ly=(ssy+eey)/2+py*(curveAmt+8);
+      var lt=sv("text",{x:lx,y:ly,"text-anchor":"middle","font-family":"'JetBrains Mono',monospace","font-size":"6",fill:CA,opacity:"0.5"});
+      lt.textContent=edge.lb;
+      svg.appendChild(lt);
     }
-    svg.appendChild(txt);
   }
 
-  // NODES
-  for(var n=0;n<TOPICS.length;n++){
-    var t=TOPICS[n],pos=NP[t.id];
-    var cx=pos.x*W,cy=pos.y*H,lv=S[t.id],col=sc(lv),isSel=(sel===t.id);
+  // Draw nodes
+  for(var n=0;n<T.length;n++){
+    var t=T[n],p=nodePos[t.id];
+    var lv=G[t.id],col=sc(lv),isSel=(sel===t.id);
+    var isOrb=!t.geo;
 
     var g=sv("g",{cursor:"pointer"});
     g.onclick=(function(tid){return function(){selectT(tid)}})(t.id);
 
     // Glow
-    g.appendChild(sv("circle",{cx:cx,cy:cy,r:NR+18,fill:col,opacity:"0.04",filter:"url(#gf-"+t.id+")"}));
+    g.appendChild(sv("circle",{cx:p.x,cy:p.y,r:NR+10,fill:col,opacity:"0.04",filter:"url(#glow)"}));
 
     // Outer ring
-    g.appendChild(sv("circle",{cx:cx,cy:cy,r:NR+6,fill:"none",stroke:col,"stroke-width":isSel?"1.5":"0.8",opacity:isSel?"0.5":"0.2","stroke-dasharray":isSel?"none":"2 3"}));
+    g.appendChild(sv("circle",{cx:p.x,cy:p.y,r:NR+4,fill:"none",stroke:col,
+      "stroke-width":isSel?"1.5":"0.6",opacity:isSel?"0.5":"0.2",
+      "stroke-dasharray":isOrb?"2 2":"none"}));
 
-    // Main circle with gradient fill
-    g.appendChild(sv("circle",{cx:cx,cy:cy,r:NR,fill:"url(#ng-"+t.id+")",stroke:col,"stroke-width":isSel?"3":"2",opacity:"1"}));
-
-    // Inner highlight arc (top-left)
-    g.appendChild(sv("circle",{cx:cx,cy:cy,r:NR-3,fill:"none",stroke:col,"stroke-width":"0.5",opacity:"0.15"}));
+    // Main circle
+    g.appendChild(sv("circle",{cx:p.x,cy:p.y,r:NR,
+      fill:isSel?"#0c1828":"#060d18",stroke:col,
+      "stroke-width":isSel?"2.5":"1.5"}));
 
     // Label
-    var tl=sv("text",{x:cx,y:cy-7,"text-anchor":"middle","font-family":"'DM Sans',sans-serif","font-size":"12","font-weight":"700",fill:"#e8f0f8"});
-    tl.textContent=t.short;
+    var tl=sv("text",{x:p.x,y:p.y-3,"text-anchor":"middle",
+      "font-family":"'DM Sans',sans-serif","font-size":"8","font-weight":"700",fill:"#dce8f4"});
+    tl.textContent=t.s;
     g.appendChild(tl);
 
-    // Scenario
-    var sl=sv("text",{x:cx,y:cy+10,"text-anchor":"middle","font-family":"'JetBrains Mono',monospace","font-size":"8.5",fill:col,opacity:"0.9"});
-    sl.textContent=t.sc[lv-1].l;
-    g.appendChild(sl);
+    // Scenario label
+    var slab=sv("text",{x:p.x,y:p.y+8,"text-anchor":"middle",
+      "font-family":"'JetBrains Mono',monospace","font-size":"6",fill:col,opacity:"0.8"});
+    slab.textContent="S"+lv;
+    g.appendChild(slab);
+
+    // Wedge indicator
+    var wc={"MIL":"#ff6688","ENE":"#ffaa44","FIN":"#44aaff","HYB":"#aa66ff","POL":"#66ddaa","TEC":"#ff66dd"};
+    g.appendChild(sv("circle",{cx:p.x+NR-2,cy:p.y-NR+2,r:3,fill:wc[t.w]||"#888",opacity:"0.7"}));
 
     svg.appendChild(g);
   }
@@ -355,19 +437,19 @@ function renderG(){
 
 function renderTP(){
   var c=document.getElementById("tp");
-  if(!sel){c.innerHTML='<span style="color:#3a5a7c;font-size:10px">Click a node</span>';return}
-  var t=null;for(var i=0;i<TOPICS.length;i++)if(TOPICS[i].id===sel)t=TOPICS[i];
+  if(!sel){c.innerHTML='<span style="color:#2a4868;font-size:9px">Click a node</span>';return}
+  var t=null;for(var i=0;i<T.length;i++)if(T[i].id===sel)t=T[i];
   if(!t)return;
-  var cur=S[t.id];
-  var h='<div class="t-name">'+t.name+'</div>';
-  h+='<div class="t-cur" style="color:'+sc(cur)+'">'+t.sc[cur-1].l+'</div>';
+  var cur=G[t.id];
+  var h='<div class="tn">'+t.n+'</div>';
+  h+='<div class="tc" style="color:'+sc(cur)+'">'+t.sc[cur-1].l+'</div>';
   for(var s=0;s<t.sc.length;s++){
     var sc2=t.sc[s],sl=s+1,av=avail(t,sl),ic=(sl===cur);
-    var cls="s-btn";if(ic)cls+=" on";if(!av&&!ic)cls+=" off";
+    var cls="sb";if(ic)cls+=" on";if(!av&&!ic)cls+=" off";
     h+='<div class="'+cls+'" onclick="applyT(\''+t.id+'\','+sl+')">';
-    h+='<div class="s-dot" style="background:'+sc(sl)+'"></div>';
-    h+='<div class="s-body"><div>'+sc2.l+'</div><div class="s-desc">'+sc2.d+'</div></div>';
-    if(!av&&!ic&&sc2.pt)h+='<div class="s-lock">\uD83D\uDD12 '+sc2.pt+'</div>';
+    h+='<div class="sd" style="background:'+sc(sl)+'"></div>';
+    h+='<div class="sl"><div>'+sc2.l+'</div><div class="sld">'+sc2.d+'</div></div>';
+    if(!av&&!ic&&sc2.pt)h+='<div class="sk">\uD83D\uDD12 '+sc2.pt+'</div>';
     h+='</div>';
   }
   c.innerHTML=h;
@@ -376,34 +458,35 @@ function renderTP(){
 function renderImp(){
   var a=agg(),c=document.getElementById("imp"),h="";
   for(var i=0;i<IK.length;i++){
-    var k=IK[i],v=a[k.k],p=(v/5)*100;
-    var col=v===0?"#2a3a4c":v<=2?CS1:v<=3?CS2:CS3;
-    h+='<div class="imp-row"><div class="imp-lbl">'+k.n+'</div>';
-    h+='<div class="imp-trk"><div class="imp-fill" style="width:'+p+'%;background:'+col+'"></div></div>';
-    h+='<div class="imp-v" style="color:'+col+'">'+v+'/5</div></div>';
+    var k=IK[i],v=a[k.k],p=Math.min(100,(v/5)*100);
+    var col=v===0?"#1a3050":v<=2?C1:v<=3?C2:C3;
+    h+='<div class="ir"><div class="il">'+k.n+'</div>';
+    h+='<div class="it"><div class="if" style="width:'+p+'%;background:'+col+'"></div></div>';
+    h+='<div class="iv" style="color:'+col+'">'+v+'/5</div></div>';
   }
   c.innerHTML=h;
 }
 
 function renderHdr(){
-  var h="";for(var i=0;i<TOPICS.length;i++){
-    var t=TOPICS[i],lv=S[t.id];
-    h+='<div class="chip"><div class="chip-dot" style="background:'+sc(lv)+'"></div>'+t.short+':S'+lv+'</div>';
+  var h="";for(var i=0;i<T.length;i++){
+    var t=T[i],lv=G[t.id];
+    if(lv>1)h+='<div class="ch"><div class="cd" style="background:'+sc(lv)+'"></div>'+t.s+':S'+lv+'</div>';
   }
-  document.getElementById("hdr-chips").innerHTML=h;
+  if(!h)h='<span style="font-size:8px;color:#2a4868">All S1</span>';
+  document.getElementById("hc").innerHTML=h;
 }
 
 function renderPos(){
-  var p=[];for(var i=0;i<TOPICS.length;i++)p.push(TOPICS[i].short+"=S"+S[TOPICS[i].id]);
-  document.getElementById("pos-lbl").innerHTML="\u03A3 = <b>("+p.join(", ")+")</b>";
+  var ct=0;for(var i=0;i<T.length;i++)if(G[T[i].id]>1)ct++;
+  document.getElementById("pl").innerHTML="<b>"+ct+"</b>/19 topics escalated";
 }
 
 function renderPL(){
   var c=document.getElementById("plog");
-  if(!plog.length){c.innerHTML='<span style="color:#3a5a7c;font-size:10px">No transitions yet.</span>';return}
+  if(!plog.length){c.innerHTML='<span style="color:#2a4868;font-size:9px">No transitions yet.</span>';return}
   var h="";for(var i=0;i<plog.length;i++){
-    var e=plog[i];h+='<div class="p-entry"><span class="p-step">'+( i+1)+'.</span>'+e.t+' S'+e.f+' \u2192 S'+e.to;
-    for(var j=0;j<e.fx.length;j++)h+='<div class="p-fx">\u21B3 '+e.fx[j]+'</div>';
+    var e=plog[i];h+='<div class="pe"><span class="ps">'+(i+1)+'.</span>'+e.t+' S'+e.f+'\u2192S'+e.to;
+    for(var j=0;j<e.fx.length;j++)h+='<div class="pf">\u21B3 '+e.fx[j]+'</div>';
     h+='</div>';
   }
   c.innerHTML=h;
@@ -414,29 +497,30 @@ function R(){renderG();renderTP();renderImp();renderHdr();renderPos();renderPL()
 function selectT(id){sel=id;R()}
 
 function applyT(id,nl){
-  var cur=S[id];if(nl===cur)return;
-  var t=null;for(var i=0;i<TOPICS.length;i++)if(TOPICS[i].id===id)t=TOPICS[i];
+  var cur=G[id];if(nl===cur)return;
+  var t=null;for(var i=0;i<T.length;i++)if(T[i].id===id)t=T[i];
   if(!t||!avail(t,nl))return;
-  hist.push({s:{iran:S.iran,russia:S.russia,china:S.china,europe:S.europe},pl:plog.length});
-  var prev={iran:S.iran,russia:S.russia,china:S.china,europe:S.europe};
-  S[id]=nl;
+  var snap={};for(var k in G)snap[k]=G[k];
+  hist.push({s:snap,pl:plog.length});
+  var prev={};for(var k in G)prev[k]=G[k];
+  G[id]=nl;
   var eqC=eq(),fx=[];
-  for(var i=0;i<TOPICS.length;i++){
-    var tt=TOPICS[i];if(tt.id===id)continue;
+  for(var i=0;i<T.length;i++){
+    var tt=T[i];if(tt.id===id)continue;
     for(var s=0;s<tt.sc.length;s++){
       var sc2=tt.sc[s];
       if(sc2.pc&&avail(tt,s+1)&&!sc2.pc(prev))
-        fx.push("\uD83D\uDD13 "+tt.short+" "+sc2.l+" available");
+        fx.push("\uD83D\uDD13 "+tt.s+" "+sc2.l+" available");
     }
   }
   for(var i=0;i<eqC.length;i++)
-    fx.push("\u26A0 "+eqC[i].t.short+" forced S"+eqC[i].f+"\u2192S"+eqC[i].to);
-  plog.push({t:t.short,f:cur,to:nl,fx:fx});
+    fx.push("\u26A0 "+eqC[i].t.s+" forced S"+eqC[i].f+"\u2192S"+eqC[i].to);
+  plog.push({t:t.s,f:cur,to:nl,fx:fx});
   R();
 }
 
-function resetAll(){S={iran:1,russia:1,china:1,europe:1};sel=null;plog=[];hist=[];R()}
-function undoLast(){if(!hist.length)return;var p=hist.pop();S=p.s;plog.length=p.pl;R()}
+function reset(){G={};for(var i=0;i<T.length;i++)G[T[i].id]=1;sel=null;plog=[];hist=[];R()}
+function undo(){if(!hist.length)return;var p=hist.pop();G=p.s;plog.length=p.pl;R()}
 
 window.addEventListener("resize",R);
 R();
