@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CHESS Navigator -- GeoIntel KB</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+–bg: #020507;
+–surface: #0a1929;
+–surface2: #0d2035;
+–border: #1a4a72;
+–accent: #00d4ff;
+–green: #00ff88;
+–amber: #ffaa00;
+–red: #ff4466;
+–text: #c8d8e8;
+–text2: #7a9ab8;
+–text3: #3d5a73;
+–s1: #00ff88;
+–s2: #ffaa00;
+–s3: #ff4466;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 13px;
+height: 100vh;
+overflow: hidden;
+-webkit-text-size-adjust: 100%;
+}
+
+/* === LAYOUT === */
+.app {
+display: grid;
+grid-template-columns: 1fr 340px;
+grid-template-rows: 52px 1fr 160px;
+height: 100vh;
+gap: 0;
+}
+
+/* === HEADER === */
+header {
+grid-column: 1 / -1;
+background: #071525;
+border-bottom: 2px solid var(–border);
+display: flex;
+align-items: center;
+padding: 0 20px;
+gap: 20px;
+}
+.logo {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 16px;
+font-weight: 800;
+color: #fff;
+}
+.logo span { color: var(–accent); }
+.logo-sub {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+color: var(–text3);
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+.hdr-state {
+margin-left: auto;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+.state-chip {
+display: flex;
+align-items: center;
+gap: 6px;
+padding: 4px 10px;
+border: 1px solid var(–border);
+font-size: 11px;
+color: var(–text2);
+}
+.state-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+.btn-reset {
+background: none;
+border: 1px solid var(–border);
+color: var(–text2);
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+padding: 5px 14px;
+cursor: pointer;
+letter-spacing: 1px;
+}
+.btn-reset:hover { border-color: var(–accent); color: var(–accent); }
+
+/* === GRAPH AREA === */
+.graph-area {
+grid-column: 1;
+grid-row: 2 / 4;
+position: relative;
+overflow: hidden;
+background:
+radial-gradient(ellipse at 30% 40%, rgba(0,212,255,0.03) 0%, transparent 60%),
+radial-gradient(ellipse at 70% 60%, rgba(0,255,136,0.02) 0%, transparent 50%),
+var(–bg);
+}
+.graph-area svg {
+width: 100%;
+height: 100%;
+}
+
+/* === RIGHT PANEL === */
+.right-panel {
+grid-column: 2;
+grid-row: 2 / 4;
+border-left: 1px solid var(–border);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+background: var(–surface);
+}
+
+.panel-section {
+border-bottom: 1px solid var(–border);
+padding: 16px;
+}
+.panel-section:last-child { border-bottom: none; flex: 1; overflow-y: auto; }
+.panel-title {
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: var(–text3);
+margin-bottom: 12px;
+}
+
+/* === TOPIC DETAIL === */
+.topic-detail {
+display: none;
+}
+.topic-detail.active { display: block; }
+.topic-name {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 18px;
+font-weight: 700;
+color: #fff;
+margin-bottom: 4px;
+}
+.topic-scenario {
+font-size: 12px;
+margin-bottom: 16px;
+}
+
+.scenario-list {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+.scenario-btn {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+border: 1px solid var(–border);
+background: var(–surface2);
+color: var(–text);
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+cursor: pointer;
+text-align: left;
+transition: all 0.2s;
+}
+.scenario-btn:hover { border-color: var(–accent); }
+.scenario-btn.active {
+border-color: var(–accent);
+background: rgba(0,212,255,0.08);
+color: #fff;
+}
+.scenario-btn.locked {
+opacity: 0.35;
+cursor: not-allowed;
+border-style: dashed;
+}
+.scenario-btn.locked:hover { border-color: var(–border); }
+.scenario-badge {
+width: 10px;
+height: 10px;
+border-radius: 50%;
+flex-shrink: 0;
+}
+.scenario-label { flex: 1; }
+.scenario-lock {
+font-size: 10px;
+color: var(–text3);
+font-style: italic;
+}
+
+/* === PATH LOG === */
+.path-log {
+flex: 1;
+overflow-y: auto;
+}
+.path-entry {
+padding: 8px 0;
+border-bottom: 1px solid rgba(26,74,114,0.4);
+font-size: 11px;
+}
+.path-entry:last-child { border-bottom: none; }
+.path-step {
+color: var(–accent);
+font-weight: 600;
+margin-right: 6px;
+}
+.path-effect {
+color: var(–text3);
+font-size: 10px;
+margin-top: 3px;
+padding-left: 16px;
+}
+
+/* === IMPACT BAR === */
+.impact-section {
+padding: 12px 16px;
+}
+.impact-bars {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+.impact-row {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.impact-label {
+font-size: 10px;
+color: var(–text2);
+width: 100px;
+flex-shrink: 0;
+text-align: right;
+}
+.impact-track {
+flex: 1;
+height: 6px;
+background: rgba(26,74,114,0.3);
+position: relative;
+}
+.impact-fill {
+height: 100%;
+transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s;
+}
+.impact-val {
+font-size: 10px;
+color: var(–text3);
+width: 30px;
+text-align: right;
+}
+
+/* === GRAPH ELEMENTS === */
+.node-group { cursor: pointer; }
+.node-circle {
+stroke-width: 2.5;
+transition: fill 0.4s, stroke 0.4s, r 0.3s;
+}
+.node-group:hover .node-circle { stroke-width: 3.5; }
+.node-label {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 13px;
+font-weight: 700;
+fill: #fff;
+text-anchor: middle;
+pointer-events: none;
+}
+.node-scenario-label {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+fill: var(–text2);
+text-anchor: middle;
+pointer-events: none;
+}
+.edge-line {
+stroke-width: 1.8;
+fill: none;
+transition: stroke 0.4s, stroke-dasharray 0.4s, opacity 0.4s;
+}
+.edge-label {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 9px;
+fill: var(–text3);
+text-anchor: middle;
+pointer-events: none;
+}
+.edge-arrow {
+transition: fill 0.4s;
+}
+
+/* === INSTRUCTIONS OVERLAY === */
+.instructions {
+position: absolute;
+bottom: 16px;
+left: 16px;
+background: rgba(10,25,41,0.9);
+border: 1px solid var(–border);
+padding: 12px 16px;
+font-size: 11px;
+color: var(–text2);
+max-width: 320px;
+line-height: 1.6;
+backdrop-filter: blur(8px);
+}
+.instructions strong { color: var(–accent); }
+
+/* === POSITION LABEL === */
+.position-label {
+position: absolute;
+top: 16px;
+left: 16px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: var(–text3);
+letter-spacing: 1px;
+}
+.position-label span { color: var(–text); }
+</style>
+
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+
+  <header>
+    <div>
+      <div class="logo">Geo<span>Intel</span></div>
+    </div>
+    <div class="logo-sub">CHESS Navigator</div>
+    <div class="hdr-state" id="hdr-state"></div>
+    <button class="btn-reset" onclick="resetAll()">RESET</button>
+    <button class="btn-reset" onclick="undoLast()">UNDO</button>
+  </header>
+
+  <!-- GRAPH -->
+
+  <div class="graph-area" id="graph-area">
+    <div class="position-label" id="position-label"></div>
+    <svg id="graph-svg"></svg>
+    <div class="instructions" id="instructions">
+      <strong>CHESS Navigator</strong> -- Click a node to select a topic. Then choose a scenario transition from the right panel. Locked scenarios (dashed) require preconditions. The path log tracks your analytical journey.
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+
+  <div class="right-panel">
+
+```
+<!-- TOPIC DETAIL -->
+<div class="panel-section" id="topic-panel">
+  <div class="panel-title">Selected Topic</div>
+  <div id="topic-detail-none" style="color:var(--text3);font-size:11px">Click a node to inspect</div>
+  <div class="topic-detail" id="topic-detail"></div>
+</div>
+
+<!-- IMPACT -->
+<div class="panel-section impact-section">
+  <div class="panel-title">Insurance Impact -- Current Position</div>
+  <div class="impact-bars" id="impact-bars"></div>
+</div>
+
+<!-- PATH LOG -->
+<div class="panel-section">
+  <div class="panel-title">Path Log</div>
+  <div class="path-log" id="path-log">
+    <div style="color:var(--text3);font-size:11px">No transitions yet. Click a topic node to begin.</div>
+  </div>
+</div>
+```
+
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CHESS DATA MODEL
+// ============================================================
+
+var TOPICS = [
+  {
+    id: "iran",
+    name: "Iran / Middle East",
+    short: "IRAN",
+    scenarios: [
+      { id: "s1", label: "S1 -- Base", desc: "Proxy war, Hormuz operational, no direct US engagement", precondition: null },
+      { id: "s2", label: "S2 -- Escalation", desc: "US strikes on Iranian infrastructure; Hormuz partially disrupted", precondition: null },
+      { id: "s3", label: "S3 -- Full Conflict", desc: "Direct US-Iran war; Hormuz closed >30 days", precondition: null }
+    ],
+    impacts: { inflation: 0, gdp: 0, ir: 0, bund: 0, btp: 0, commodity: 0, cyber: 0, bi: 0 }
+  },
+  {
+    id: "russia",
+    name: "Russia -- Ukraine",
+    short: "RUS-UKR",
+    scenarios: [
+      { id: "s1", label: "S1 -- Stalemate", desc: "Prolonged attrition, no decisive offensive", precondition: null },
+      { id: "s2", label: "S2 -- Escalation", desc: "Russian offensive expands; Article 5 consultation", precondition: null },
+      { id: "s3", label: "S3 -- Collapse", desc: "Ukrainian territorial collapse or Article 5 invocation", precondition: function(S) { return S.iran >= 2; }, preconditionText: "Requires Iran \u2265 S2" }
+    ],
+    impacts: { inflation: 0, gdp: 0, ir: 0, bund: 0, btp: 0, commodity: 0, cyber: 0, bi: 0 }
+  },
+  {
+    id: "china",
+    name: "China -- Taiwan",
+    short: "CHN-TWN",
+    scenarios: [
+      { id: "s1", label: "S1 -- Deterrence", desc: "US deterrence intact; no Chinese military action", precondition: null },
+      { id: "s2", label: "S2 -- Coercion", desc: "China naval pressure; US credibility questioned", precondition: function(S) { return S.iran >= 2; }, preconditionText: "Requires Iran \u2265 S2" },
+      { id: "s3", label: "S3 -- Conflict", desc: "Military action on Taiwan; TSMC disruption", precondition: function(S) { return S.iran >= 3 && S.russia >= 2; }, preconditionText: "Requires Iran = S3 AND Russia \u2265 S2" }
+    ],
+    impacts: { inflation: 0, gdp: 0, ir: 0, bund: 0, btp: 0, commodity: 0, cyber: 0, bi: 0 }
+  },
+  {
+    id: "europe",
+    name: "Europe",
+    short: "EU",
+    scenarios: [
+      { id: "s1", label: "S1 -- Fragmented", desc: "EU governance under stress, uncoordinated response", precondition: null },
+      { id: "s2", label: "S2 -- Crisis", desc: "Political crisis blocks collective EU response", precondition: null },
+      { id: "s3", label: "S3 -- Energy Independence", desc: "Structural EU energy decoupling from Russian gas", precondition: function(S) { return S.russia >= 2; }, preconditionText: "Requires Russia \u2265 S2" }
+    ],
+    impacts: { inflation: 0, gdp: 0, ir: 0, bund: 0, btp: 0, commodity: 0, cyber: 0, bi: 0 }
+  }
+];
+
+// Precondition edges for visual display
+var EDGES = [
+  { from: "iran", to: "russia", label: "Iran\u2265S2 unlocks\nRussia S3", check: function(S) { return S.iran >= 2; } },
+  { from: "iran", to: "china", label: "Iran\u2265S2 unlocks\nChina S2", check: function(S) { return S.iran >= 2; } },
+  { from: "iran", to: "china", label: "Iran=S3 +\nRussia\u2265S2\nunlocks China S3", check: function(S) { return S.iran >= 3 && S.russia >= 2; }, secondary: true },
+  { from: "russia", to: "europe", label: "Russia\u2265S2 unlocks\nEurope S3", check: function(S) { return S.russia >= 2; } }
+];
+
+// Impact matrices per topic-scenario
+var IMPACT_MATRIX = {
+  iran:   { s1: {inflation:0,gdp:0,ir:0,bund:0,btp:0,commodity:0,cyber:0,bi:0},
+            s2: {inflation:3,gdp:2,ir:1,bund:1,btp:2,commodity:4,cyber:1,bi:3},
+            s3: {inflation:5,gdp:4,ir:3,bund:3,btp:4,commodity:5,cyber:2,bi:5} },
+  russia: { s1: {inflation:1,gdp:1,ir:0,bund:0,btp:1,commodity:1,cyber:1,bi:1},
+            s2: {inflation:3,gdp:2,ir:1,bund:2,btp:3,commodity:3,cyber:3,bi:2},
+            s3: {inflation:4,gdp:4,ir:2,bund:4,btp:5,commodity:4,cyber:4,bi:4} },
+  china:  { s1: {inflation:0,gdp:0,ir:0,bund:0,btp:0,commodity:0,cyber:1,bi:0},
+            s2: {inflation:2,gdp:2,ir:1,bund:1,btp:1,commodity:2,cyber:3,bi:3},
+            s3: {inflation:5,gdp:5,ir:3,bund:3,btp:3,commodity:4,cyber:5,bi:5} },
+  europe: { s1: {inflation:1,gdp:1,ir:0,bund:1,btp:2,commodity:0,cyber:0,bi:0},
+            s2: {inflation:2,gdp:2,ir:1,bund:3,btp:4,commodity:1,cyber:1,bi:1},
+            s3: {inflation:2,gdp:1,ir:1,bund:1,btp:1,commodity:2,cyber:0,bi:1} }
+};
+
+var IMPACT_LABELS = [
+  { key: "inflation", label: "Inflation" },
+  { key: "gdp", label: "GDP Growth" },
+  { key: "ir", label: "Interest Rates" },
+  { key: "bund", label: "Bund Spread" },
+  { key: "btp", label: "BTP Spread" },
+  { key: "commodity", label: "Commodity" },
+  { key: "cyber", label: "Cyber" },
+  { key: "bi", label: "Op. Disruption" }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+
+var globalState = { iran: 1, russia: 1, china: 1, europe: 1 };
+var selectedTopic = null;
+var pathLog = [];
+var stateHistory = [];
+
+function scenarioIndex(sid) {
+  return parseInt(sid.replace("s", ""));
+}
+
+function getScenarioColor(level) {
+  if (level === 1) return "var(--s1)";
+  if (level === 2) return "var(--s2)";
+  return "var(--s3)";
+}
+
+function isAvailable(topic, scenarioIdx) {
+  var scenario = topic.scenarios[scenarioIdx - 1];
+  if (!scenario) return false;
+  if (!scenario.precondition) return true;
+  return scenario.precondition(globalState);
+}
+
+// Equilibration: if a topic is in a scenario that's no longer available, fall back
+function equilibrate() {
+  var changes = [];
+  for (var t = 0; t < TOPICS.length; t++) {
+    var topic = TOPICS[t];
+    var current = globalState[topic.id];
+    if (!isAvailable(topic, current)) {
+      // Find highest available
+      var best = 1;
+      for (var s = current - 1; s >= 1; s--) {
+        if (isAvailable(topic, s)) { best = s; break; }
+      }
+      changes.push({ topic: topic, from: current, to: best });
+      globalState[topic.id] = best;
+    }
+  }
+  return changes;
+}
+
+function computeAggregateImpact() {
+  var agg = {};
+  for (var i = 0; i < IMPACT_LABELS.length; i++) {
+    agg[IMPACT_LABELS[i].key] = 0;
+  }
+  for (var t = 0; t < TOPICS.length; t++) {
+    var tid = TOPICS[t].id;
+    var sid = "s" + globalState[tid];
+    var m = IMPACT_MATRIX[tid][sid];
+    for (var k in m) {
+      if (agg[k] !== undefined) {
+        agg[k] = Math.max(agg[k], m[k]);
+      }
+    }
+  }
+  return agg;
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+var NODE_POSITIONS = {
+  iran:   { x: 0.3, y: 0.35 },
+  russia: { x: 0.7, y: 0.3 },
+  china:  { x: 0.25, y: 0.7 },
+  europe: { x: 0.75, y: 0.72 }
+};
+
+var NODE_RADIUS = 52;
+
+function renderGraph() {
+  var svg = document.getElementById("graph-svg");
+  var area = document.getElementById("graph-area");
+  var W = area.clientWidth;
+  var H = area.clientHeight;
+  svg.innerHTML = "";
+
+  // Defs for arrows
+  var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+  var markerActive = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+  markerActive.setAttribute("id", "arrow-active");
+  markerActive.setAttribute("viewBox", "0 0 10 10");
+  markerActive.setAttribute("refX", "10");
+  markerActive.setAttribute("refY", "5");
+  markerActive.setAttribute("markerWidth", "8");
+  markerActive.setAttribute("markerHeight", "8");
+  markerActive.setAttribute("orient", "auto-start-reverse");
+  var pathA = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  pathA.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+  pathA.setAttribute("fill", "var(--accent)");
+  markerActive.appendChild(pathA);
+  defs.appendChild(markerActive);
+
+  var markerInactive = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+  markerInactive.setAttribute("id", "arrow-inactive");
+  markerInactive.setAttribute("viewBox", "0 0 10 10");
+  markerInactive.setAttribute("refX", "10");
+  markerInactive.setAttribute("refY", "5");
+  markerInactive.setAttribute("markerWidth", "8");
+  markerInactive.setAttribute("markerHeight", "8");
+  markerInactive.setAttribute("orient", "auto-start-reverse");
+  var pathI = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  pathI.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+  pathI.setAttribute("fill", "var(--text3)");
+  markerInactive.appendChild(pathI);
+  defs.appendChild(markerInactive);
+
+  svg.appendChild(defs);
+
+  // Draw edges
+  for (var e = 0; e < EDGES.length; e++) {
+    var edge = EDGES[e];
+    var fromPos = NODE_POSITIONS[edge.from];
+    var toPos = NODE_POSITIONS[edge.to];
+    var x1 = fromPos.x * W;
+    var y1 = fromPos.y * H;
+    var x2 = toPos.x * W;
+    var y2 = toPos.y * H;
+
+    // Offset for secondary edges
+    var offsetX = 0, offsetY = 0;
+    if (edge.secondary) { offsetX = 15; offsetY = 15; }
+
+    // Shorten line to not overlap nodes
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var ux = dx / dist;
+    var uy = dy / dist;
+    var sx = x1 + ux * (NODE_RADIUS + 8) + offsetX;
+    var sy = y1 + uy * (NODE_RADIUS + 8) + offsetY;
+    var ex = x2 - ux * (NODE_RADIUS + 12) + offsetX;
+    var ey = y2 - uy * (NODE_RADIUS + 12) + offsetY;
+
+    var active = edge.check(globalState);
+
+    // Curved path
+    var mx = (sx + ex) / 2 + (ey - sy) * 0.15 + offsetX;
+    var my = (sy + ey) / 2 - (ex - sx) * 0.15 + offsetY;
+
+    var line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    line.setAttribute("d", "M " + sx + " " + sy + " Q " + mx + " " + my + " " + ex + " " + ey);
+    line.setAttribute("class", "edge-line");
+    line.setAttribute("stroke", active ? "var(--accent)" : "var(--text3)");
+    line.setAttribute("stroke-dasharray", active ? "none" : "6 4");
+    line.setAttribute("opacity", active ? "0.7" : "0.25");
+    line.setAttribute("marker-end", active ? "url(#arrow-active)" : "url(#arrow-inactive)");
+    svg.appendChild(line);
+
+    // Edge label
+    var lbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    lbl.setAttribute("x", mx);
+    lbl.setAttribute("y", my - 6);
+    lbl.setAttribute("class", "edge-label");
+    lbl.setAttribute("fill", active ? "var(--accent)" : "var(--text3)");
+    lbl.setAttribute("opacity", active ? "0.8" : "0.4");
+    var lines = edge.label.split("\n");
+    for (var li = 0; li < lines.length; li++) {
+      var tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+      tspan.setAttribute("x", mx);
+      tspan.setAttribute("dy", li === 0 ? "0" : "12");
+      tspan.textContent = lines[li];
+      lbl.appendChild(tspan);
+    }
+    svg.appendChild(lbl);
+  }
+
+  // Draw nodes
+  for (var n = 0; n < TOPICS.length; n++) {
+    var topic = TOPICS[n];
+    var pos = NODE_POSITIONS[topic.id];
+    var cx = pos.x * W;
+    var cy = pos.y * H;
+    var level = globalState[topic.id];
+    var color = getScenarioColor(level);
+
+    var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("class", "node-group");
+    g.setAttribute("data-topic", topic.id);
+    g.onclick = (function(tid) { return function() { selectTopic(tid); }; })(topic.id);
+
+    // Glow
+    var glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    glow.setAttribute("cx", cx);
+    glow.setAttribute("cy", cy);
+    glow.setAttribute("r", NODE_RADIUS + 8);
+    glow.setAttribute("fill", "none");
+    glow.setAttribute("stroke", color);
+    glow.setAttribute("stroke-width", "1");
+    glow.setAttribute("opacity", "0.2");
+    g.appendChild(glow);
+
+    // Main circle
+    var circ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circ.setAttribute("cx", cx);
+    circ.setAttribute("cy", cy);
+    circ.setAttribute("r", NODE_RADIUS);
+    circ.setAttribute("class", "node-circle");
+    circ.setAttribute("fill", "var(--surface2)");
+    circ.setAttribute("stroke", color);
+    if (selectedTopic === topic.id) {
+      circ.setAttribute("stroke-width", "4");
+      circ.setAttribute("fill", "rgba(0,212,255,0.08)");
+    }
+    g.appendChild(circ);
+
+    // Label
+    var label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", cx);
+    label.setAttribute("y", cy - 6);
+    label.setAttribute("class", "node-label");
+    label.textContent = topic.short;
+    g.appendChild(label);
+
+    // Scenario label
+    var slbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    slbl.setAttribute("x", cx);
+    slbl.setAttribute("y", cy + 14);
+    slbl.setAttribute("class", "node-scenario-label");
+    slbl.setAttribute("fill", color);
+    slbl.textContent = topic.scenarios[level - 1].label;
+    g.appendChild(slbl);
+
+    svg.appendChild(g);
+  }
+}
+
+function renderTopicPanel() {
+  var panel = document.getElementById("topic-detail");
+  var none = document.getElementById("topic-detail-none");
+
+  if (!selectedTopic) {
+    panel.className = "topic-detail";
+    none.style.display = "block";
+    return;
+  }
+
+  none.style.display = "none";
+  panel.className = "topic-detail active";
+
+  var topic = null;
+  for (var i = 0; i < TOPICS.length; i++) {
+    if (TOPICS[i].id === selectedTopic) { topic = TOPICS[i]; break; }
+  }
+  if (!topic) return;
+
+  var currentLevel = globalState[topic.id];
+  var html = '<div class="topic-name">' + topic.name + '</div>';
+  html += '<div class="topic-scenario" style="color:' + getScenarioColor(currentLevel) + '">';
+  html += 'Current: ' + topic.scenarios[currentLevel - 1].label + '</div>';
+  html += '<div class="scenario-list">';
+
+  for (var s = 0; s < topic.scenarios.length; s++) {
+    var sc = topic.scenarios[s];
+    var sLevel = s + 1;
+    var available = isAvailable(topic, sLevel);
+    var isCurrent = (sLevel === currentLevel);
+    var cls = "scenario-btn";
+    if (isCurrent) cls += " active";
+    if (!available && !isCurrent) cls += " locked";
+
+    var badgeColor = getScenarioColor(sLevel);
+
+    html += '<div class="' + cls + '" data-topic="' + topic.id + '" data-level="' + sLevel + '" onclick="applyTransition(\'' + topic.id + '\',' + sLevel + ')">';
+    html += '<div class="scenario-badge" style="background:' + badgeColor + '"></div>';
+    html += '<div class="scenario-label">';
+    html += '<div>' + sc.label + '</div>';
+    html += '<div style="font-size:10px;color:var(--text3);margin-top:2px">' + sc.desc + '</div>';
+    html += '</div>';
+    if (!available && !isCurrent && sc.preconditionText) {
+      html += '<div class="scenario-lock">\uD83D\uDD12 ' + sc.preconditionText + '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+
+  panel.innerHTML = html;
+}
+
+function renderImpact() {
+  var agg = computeAggregateImpact();
+  var container = document.getElementById("impact-bars");
+  var html = "";
+  for (var i = 0; i < IMPACT_LABELS.length; i++) {
+    var imp = IMPACT_LABELS[i];
+    var val = agg[imp.key];
+    var pct = (val / 5) * 100;
+    var color = val === 0 ? "var(--text3)" : val <= 2 ? "var(--s1)" : val <= 3 ? "var(--s2)" : "var(--s3)";
+    html += '<div class="impact-row">';
+    html += '<div class="impact-label">' + imp.label + '</div>';
+    html += '<div class="impact-track"><div class="impact-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';
+    html += '<div class="impact-val" style="color:' + color + '">' + val + '/5</div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderHeaderState() {
+  var html = "";
+  for (var i = 0; i < TOPICS.length; i++) {
+    var t = TOPICS[i];
+    var lev = globalState[t.id];
+    var col = getScenarioColor(lev);
+    html += '<div class="state-chip">';
+    html += '<div class="state-dot" style="background:' + col + '"></div>';
+    html += t.short + ':S' + lev;
+    html += '</div>';
+  }
+  document.getElementById("hdr-state").innerHTML = html;
+}
+
+function renderPositionLabel() {
+  var parts = [];
+  for (var i = 0; i < TOPICS.length; i++) {
+    parts.push(TOPICS[i].short + "=S" + globalState[TOPICS[i].id]);
+  }
+  document.getElementById("position-label").innerHTML = "\u03A3 = <span>(" + parts.join(", ") + ")</span>";
+}
+
+function renderPathLog() {
+  var container = document.getElementById("path-log");
+  if (pathLog.length === 0) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:11px">No transitions yet. Click a topic node to begin.</div>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < pathLog.length; i++) {
+    var entry = pathLog[i];
+    html += '<div class="path-entry">';
+    html += '<span class="path-step">Step ' + (i + 1) + ':</span>';
+    html += entry.topic + ' S' + entry.from + ' \u2192 S' + entry.to;
+    if (entry.effects && entry.effects.length > 0) {
+      for (var e = 0; e < entry.effects.length; e++) {
+        html += '<div class="path-effect">\u21B3 ' + entry.effects[e] + '</div>';
+      }
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderAll() {
+  renderGraph();
+  renderTopicPanel();
+  renderImpact();
+  renderHeaderState();
+  renderPositionLabel();
+  renderPathLog();
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+
+function selectTopic(topicId) {
+  selectedTopic = topicId;
+  renderAll();
+}
+
+function applyTransition(topicId, newLevel) {
+  var currentLevel = globalState[topicId];
+  if (newLevel === currentLevel) return;
+
+  // Find topic
+  var topic = null;
+  for (var i = 0; i < TOPICS.length; i++) {
+    if (TOPICS[i].id === topicId) { topic = TOPICS[i]; break; }
+  }
+  if (!topic) return;
+
+  // Check availability
+  if (!isAvailable(topic, newLevel)) return;
+
+  // Save history for undo
+  stateHistory.push({
+    state: { iran: globalState.iran, russia: globalState.russia, china: globalState.china, europe: globalState.europe },
+    pathLength: pathLog.length
+  });
+
+  // Apply transition
+  globalState[topicId] = newLevel;
+
+  // Equilibrate
+  var eqChanges = equilibrate();
+
+  // Build log entry
+  var effects = [];
+
+  // Check what opened
+  for (var t = 0; t < TOPICS.length; t++) {
+    var tt = TOPICS[t];
+    if (tt.id === topicId) continue;
+    for (var s = 0; s < tt.scenarios.length; s++) {
+      var sc = tt.scenarios[s];
+      if (sc.precondition && isAvailable(tt, s + 1)) {
+        // Check if it was previously locked
+        var prevState = stateHistory[stateHistory.length - 1].state;
+        var wasAvail = true;
+        if (sc.precondition) {
+          wasAvail = sc.precondition(prevState);
+        }
+        if (!wasAvail) {
+          effects.push("\uD83D\uDD13 " + tt.short + " " + sc.label + " now available");
+        }
+      }
+    }
+  }
+
+  // Equilibration effects
+  for (var c = 0; c < eqChanges.length; c++) {
+    effects.push("\u26A0 " + eqChanges[c].topic.short + " forced S" + eqChanges[c].from + " \u2192 S" + eqChanges[c].to + " (precondition lost)");
+  }
+
+  pathLog.push({
+    topic: topic.short,
+    from: currentLevel,
+    to: newLevel,
+    effects: effects
+  });
+
+  renderAll();
+}
+
+function resetAll() {
+  globalState = { iran: 1, russia: 1, china: 1, europe: 1 };
+  selectedTopic = null;
+  pathLog = [];
+  stateHistory = [];
+  renderAll();
+}
+
+function undoLast() {
+  if (stateHistory.length === 0) return;
+  var prev = stateHistory.pop();
+  globalState.iran = prev.state.iran;
+  globalState.russia = prev.state.russia;
+  globalState.china = prev.state.china;
+  globalState.europe = prev.state.europe;
+  pathLog.length = prev.pathLength;
+  renderAll();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+window.addEventListener("resize", renderAll);
+renderAll();
+</script>
+
+</body>
+</html>
